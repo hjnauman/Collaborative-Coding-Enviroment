@@ -1,0 +1,22 @@
+write row column string
+delete row column
+update row column string
+write-range startrow endrow startcol endcol string
+delete-range startrow endrow startcol endcol
+update-range startrow endrow startcol endcol string
+
+w
+d
+u
+x
+e
+v
+
+{
+    p: "w",				--protocol command
+    r: 183,				--row, start row
+    t: 7348, (optional)			--endrow
+    c: 385,				--column, start column
+    u: 34783, (optional)		--endcolumn
+    s: "adjfijwer"			--string
+}
