@@ -1,2 +1,2 @@
-# Collaborative-Coding-Enviroment
+# Hézuò
 UARK Capstone 2020
