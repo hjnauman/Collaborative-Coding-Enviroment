@@ -5,7 +5,7 @@ import asyncio
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QProcess
 from lined_text_editor import LineTextWidget
 
 class MainWindow(QMainWindow):
@@ -13,18 +13,44 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.initUI()
         self.event_loop = asyncio.get_event_loop()
-        self.sync_client = SynchronizationClient(self.event_loop, True)
+        self.editors = []
+        self.terminals = []
 
     def initUI(self):
+        self.main_window = QWidget(self)
+        self.setCentralWidget(self.main_window)
+
+        self.layout = QGridLayout()
+        self.main_window.setLayout(self.layout)
+
+        self.editor_tabs = QTabWidget()
+        self.editor_tabs.setTabsClosable(True)
+        self.editor_tabs.setMovable(True)
+
+        welcome_label = QLabel()
+        welcome_label.setText('Hello!')
+
+        self.editor_tabs.addTab(welcome_label, 'Welcome')
+
+        self.terminal_tabs = QTabWidget()
+        self.terminal_tabs.setTabsClosable(True)
+        self.terminal_tabs.setMovable(True)
+        
+        new_terminal_button = QPushButton('+')
+        new_terminal_button.clicked.connect(self.attach_new_terminal)
+
+        self.editor_tabs.setCornerWidget(new_terminal_button)
+        self.terminal_tabs.setCornerWidget(new_terminal_button)
+
+        self.layout.addWidget(self.editor_tabs)
+        self.layout.addWidget(self.terminal_tabs)
+
         self.statusBar().showMessage('Ready')
         
         self.setGeometry(300, 300, 900, 600)
         self.setWindowTitle('Hézuò')
 
         self.initMenuBar()
-
-        self.line_text_edit = LineTextWidget(self)
-        self.setCentralWidget(self.line_text_edit)
 
     def initMenuBar(self):
         self.menubar = self.menuBar()
@@ -70,6 +96,22 @@ class MainWindow(QMainWindow):
         file_menu.addAction(save_all_files_action)
 
         self.setMenuBar(self.menubar)
+
+    def attach_new_terminal(self):
+        terminal_process = QProcess(self)
+        terminal_window = QWidget(self)
+        terminal_process.start('xterm',['-into', str(int(terminal_window.winId()))])
+        self.terminals.append(terminal_process)
+        self.terminal_tabs.addTab(terminal_window, 'Terminal')
+
+    def create_editor(self, file_contents, tab_title):
+        text_editor = LineTextWidget(self)
+        text_editor.getTextEdit().setText(file_contents)
+        self.editors.append(text_editor)
+        self.editor_tabs.addTab(text_editor, tab_title)
+
+    def remove_editor(self):
+        print('remove')
             
     def create_new_file(self):
         y = self.line_text_edit.getTextEdit().textCursor().blockNumber()
@@ -86,7 +128,7 @@ class MainWindow(QMainWindow):
             with open(fileName, 'r') as file:
                 file_contents = file.readlines()
 
-            self.line_text_edit.getTextEdit().setText(''.join(file_contents))
+            self.create_editor(''.join(file_contents), fileName.rsplit('/', 1)[-1])
         else:
             print('File does not exist.')
 
