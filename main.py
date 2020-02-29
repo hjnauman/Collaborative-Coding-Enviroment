@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QProcess
 from lined_text_editor import LineTextWidget
 
-class MainWindow(QMainWindow):
+class MainEditorWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         self.editor_tabs = QTabWidget()
         self.editor_tabs.setTabsClosable(True)
         self.editor_tabs.setMovable(True)
-        self.editor_tabs.tabCloseRequested.connect(self.removeTab)
+        self.editor_tabs.tabCloseRequested.connect(self.remove_tab)
 
         welcome_label = QLabel()
         welcome_label.setText('Hello!')
@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.terminal_tabs = QTabWidget()
         self.terminal_tabs.setTabsClosable(True)
         self.terminal_tabs.setMovable(True)
-        
+
         new_terminal_button = QPushButton('+')
         new_terminal_button.clicked.connect(self.attach_new_terminal)
 
@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.terminal_tabs)
 
         self.statusBar().showMessage('Ready')
-        
+
         self.setGeometry(300, 300, 900, 600)
         self.setWindowTitle('Hézuò')
 
@@ -102,38 +102,39 @@ class MainWindow(QMainWindow):
         terminal_process = QProcess(self)
         terminal_window = QWidget(self)
         terminal_process.start('xterm',['-into', str(int(terminal_window.winId()))])
+
         self.terminals.append(terminal_process)
         self.terminal_tabs.addTab(terminal_window, 'Terminal')
 
     def create_editor(self, file_contents, file_path):
         text_editor = LineTextWidget(self)
         text_editor.getTextEdit().setText(file_contents)
-        
+
         title = file_path.rsplit('/', 1)[-1]
         text_editor.setWindowTitle(title)
 
         self.editors[title] = [text_editor, file_path, False, True]
-        self.editor_tabs.addTab(text_editor, file_path.rsplit('/', 1)[-1])
+        self.editor_tabs.addTab(text_editor, title)
 
     def remove_editor(self):
         print('remove')
-            
+
     def create_new_file(self):
         self.create_editor('', 'New File')
-        
-            
+
     def open_file(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self, 'Open File', '', 'All Files (*);;Python Files (*.py)', options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, 'Open File', '', 'All Files (*);;Python Files (*.py)', options=options)
 
-        if os.path.exists(fileName):
-            with open(fileName, 'r') as file:
-                file_contents = file.readlines()
+        if file_name:
+            if os.path.exists(file_name):
+                with open(file_name, 'r') as file:
+                    file_contents = file.readlines()
 
-            self.create_editor(''.join(file_contents), fileName)
-        else:
-            print('File does not exist.')
+                self.create_editor(''.join(file_contents), file_name)
+            else:
+                print('Error saving file.')
 
     def open_folder(self):
         print('test')
@@ -149,15 +150,17 @@ class MainWindow(QMainWindow):
     def save_file_as(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getSaveFileName(self, 'Save File As', '', 'All Files (*);;Text Files (*.txt)', options=options)
-        
-        with open(fileName, 'w+') as file:
-            current_tab = self.editor_tabs.currentWidget().windowTitle()
-            if(current_tab == 'New File'):
+        file_name, _ = QFileDialog.getSaveFileName(self, 'Save File As', '', 'All Files (*);;Text Files (*.txt)', options=options)
+
+        if file_name:
+            with open(file_name, 'w+') as file:
+                current_tab = self.editor_tabs.currentWidget().windowTitle()
+
+            if current_tab == 'New File':
                 text_editor = LineTextWidget(self)
-                title = fileName.rsplit('/', 1)[-1]
+                title = file_name.rsplit('/', 1)[-1]
                 text_editor.setWindowTitle(title)
-                self.editors[title] = [text_editor, fileName, False, True]
+                self.editors[title] = [text_editor, file_name, False, True]
 
             text = (self.editors[current_tab][0].getTextEdit().toPlainText())
 
@@ -165,19 +168,20 @@ class MainWindow(QMainWindow):
             file.close()
 
     def save_all_files(self):
-
         print('test')
-    
-    def removeTab(self, index):
+
+    def remove_tab(self, index):
         widget = self.editor_tabs.widget(index)
+
         if widget is not None:
             widget.deleteLater()
+
         self.editor_tabs.removeTab(index)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     
-    main_window = MainWindow()
+    main_window = MainEditorWindow()
     main_window.show()
 
     sys.exit(app.exec_())
