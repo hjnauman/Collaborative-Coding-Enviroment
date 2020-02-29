@@ -186,14 +186,6 @@ class MainEditorWindow(QMainWindow):
     def open_folder(self):
         print('test')
 
-    def save_file(self):
-        current_tab = self.editor_tabs.currentWidget().windowTitle()
-        file = open(self.editors[current_tab][1],'w')
-        text = self.editors[current_tab][0].getTextEdit().toPlainText()
-
-        file.write(text)
-        file.close()
-
     def save_file_as(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -203,14 +195,24 @@ class MainEditorWindow(QMainWindow):
             with open(file_name, 'w+') as file:
                 current_tab = self.editor_tabs.currentWidget().windowTitle()
 
-            if current_tab == 'New File':
-                text_editor = LineTextWidget(self)
-                title = file_name.rsplit('/', 1)[-1]
-                text_editor.setWindowTitle(title)
-                self.editors[title] = [text_editor, file_name, False, True]
+                if current_tab == 'New File':
+                    text_editor = LineTextWidget(self)
+                    title = file_name.rsplit('/', 1)[-1]
+                    text_editor.setWindowTitle(title)
+                    self.editors[title] = [text_editor, file_name, False, True]
 
-            text = (self.editors[current_tab][0].getTextEdit().toPlainText())
+                text = (self.editors[current_tab][0].getTextEdit().toPlainText())
 
+                file.write(text)
+                file.close()
+
+    def save_file(self):
+        current_tab = self.editor_tabs.currentWidget().windowTitle()
+        if current_tab == 'New File':
+            self.save_file_as()
+        else:
+            file = open(self.editors[current_tab][1],'w')
+            text = self.editors[current_tab][0].getTextEdit().toPlainText()
             file.write(text)
             file.close()
 
