@@ -137,6 +137,12 @@ class MainEditorWindow(QMainWindow):
         self.terminal_menu = self.menubar.addMenu('Terminal')
         self.terminal_menu.setObjectName('TerminalMenu')
 
+        self.new_terminal_action =  QAction('New Terminal', self)
+        self.new_terminal_action.setShortcut('Ctrl + Shift + `')
+        self.new_terminal_action.triggered.connect(self.attach_new_terminal)
+
+        self.terminal_menu.addAction(self.new_terminal_action)
+
         self.setMenuBar(self.menubar)
 
     def attach_new_terminal(self):
