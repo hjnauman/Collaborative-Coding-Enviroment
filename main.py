@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
         self.editor_tabs = QTabWidget()
         self.editor_tabs.setTabsClosable(True)
         self.editor_tabs.setMovable(True)
+        self.editor_tabs.tabCloseRequested.connect(self.removeTab)
 
         welcome_label = QLabel()
         welcome_label.setText('Hello!')
@@ -118,10 +119,8 @@ class MainWindow(QMainWindow):
         print('remove')
             
     def create_new_file(self):
-        y = self.line_text_edit.getTextEdit().textCursor().blockNumber()
-        x = self.line_text_edit.getTextEdit().textCursor().columnNumber()
-
-        print('test')
+        self.create_editor('', 'New File')
+        
             
     def open_file(self):
         options = QFileDialog.Options()
@@ -153,10 +152,27 @@ class MainWindow(QMainWindow):
         fileName, _ = QFileDialog.getSaveFileName(self, 'Save File As', '', 'All Files (*);;Text Files (*.txt)', options=options)
         
         with open(fileName, 'w+') as file:
-            file.write(self.line_text_edit.getTextEdit().toPlainText())
+            current_tab = self.editor_tabs.currentWidget().windowTitle()
+            if(current_tab == 'New File'):
+                text_editor = LineTextWidget(self)
+                title = fileName.rsplit('/', 1)[-1]
+                text_editor.setWindowTitle(title)
+                self.editors[title] = [text_editor, fileName, False, True]
+
+            text = (self.editors[current_tab][0].getTextEdit().toPlainText())
+
+            file.write(text)
+            file.close()
 
     def save_all_files(self):
+
         print('test')
+    
+    def removeTab(self, index):
+        widget = self.editor_tabs.widget(index)
+        if widget is not None:
+            widget.deleteLater()
+        self.editor_tabs.removeTab(index)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
