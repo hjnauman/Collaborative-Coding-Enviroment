@@ -13,7 +13,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.initUI()
         self.event_loop = asyncio.get_event_loop()
-        self.editors = []
+        self.editors = {}
         self.terminals = []
 
     def initUI(self):
@@ -104,11 +104,15 @@ class MainWindow(QMainWindow):
         self.terminals.append(terminal_process)
         self.terminal_tabs.addTab(terminal_window, 'Terminal')
 
-    def create_editor(self, file_contents, tab_title):
+    def create_editor(self, file_contents, file_path):
         text_editor = LineTextWidget(self)
         text_editor.getTextEdit().setText(file_contents)
-        self.editors.append(text_editor)
-        self.editor_tabs.addTab(text_editor, tab_title)
+        
+        title = file_path.rsplit('/', 1)[-1]
+        text_editor.setWindowTitle(title)
+
+        self.editors[title] = [text_editor, file_path, False, True]
+        self.editor_tabs.addTab(text_editor, file_path.rsplit('/', 1)[-1])
 
     def remove_editor(self):
         print('remove')
@@ -128,7 +132,7 @@ class MainWindow(QMainWindow):
             with open(fileName, 'r') as file:
                 file_contents = file.readlines()
 
-            self.create_editor(''.join(file_contents), fileName.rsplit('/', 1)[-1])
+            self.create_editor(''.join(file_contents), fileName)
         else:
             print('File does not exist.')
 
@@ -136,7 +140,12 @@ class MainWindow(QMainWindow):
         print('test')
 
     def save_file(self):
-        print('test')
+        current_tab = self.editor_tabs.currentWidget().windowTitle()
+        file = open(self.editors[current_tab][1],'w')
+        text = self.editors[current_tab][0].getTextEdit().toPlainText()
+
+        file.write(text)
+        file.close()
 
     def save_file_as(self):
         options = QFileDialog.Options()
