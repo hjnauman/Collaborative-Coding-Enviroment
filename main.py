@@ -4,26 +4,54 @@ import time
 import asyncio
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, QProcess
 from lined_text_editor import LineTextWidget
+
+# Rename tab code
+# self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("self", "Tab 1"))
 
 class MainEditorWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.event_loop = asyncio.get_event_loop()
         self.editors = {}
         self.terminals = []
 
     def initUI(self):
-        self.main_window = QWidget(self)
-        self.setCentralWidget(self.main_window)
+        self.setWindowTitle('Hézuò')
+        self.setObjectName('MainEditorWindow')
+        self.setGeometry(300, 300, 1200, 800)
 
-        self.layout = QGridLayout()
-        self.main_window.setLayout(self.layout)
+        self.central_widget = QWidget(self)
+        self.central_widget.setObjectName('CentralWidget')
+        self.setCentralWidget(self.central_widget)
 
-        self.editor_tabs = QTabWidget()
+        self.central_horizontal_layout = QHBoxLayout(self.central_widget)
+        self.central_horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        self.central_horizontal_layout.setSpacing(0)
+        self.central_horizontal_layout.setObjectName('CentralHorizontalLayout')
+
+        self.central_splitter = QSplitter(self.central_widget)
+        self.central_splitter.setOrientation(Qt.Horizontal)
+        self.central_splitter.setObjectName('CentralSplitter')
+
+        self.file_scroll_area = QScrollArea(self.central_splitter)
+        self.file_scroll_area.setWidgetResizable(True)
+        self.file_scroll_area.setObjectName('FileScrollArea')
+        
+        self.file_area_widget = QWidget()
+        self.file_area_widget.setGeometry(QtCore.QRect(0, 0, 99, 779))
+        self.file_area_widget.setObjectName('FileAreaWidget')
+
+        self.file_scroll_area.setWidget(self.file_area_widget)
+
+        self.editor_splitter = QSplitter(self.central_splitter)
+        self.editor_splitter.setOrientation(Qt.Vertical)
+        self.editor_splitter.setObjectName('EditorSplitter')
+
+        self.editor_tabs = QTabWidget(self.editor_splitter)
+        self.editor_tabs.setObjectName('EditorTabs')
         self.editor_tabs.setTabsClosable(True)
         self.editor_tabs.setMovable(True)
         self.editor_tabs.tabCloseRequested.connect(self.remove_tab)
@@ -33,68 +61,81 @@ class MainEditorWindow(QMainWindow):
 
         self.editor_tabs.addTab(welcome_label, 'Welcome')
 
-        self.terminal_tabs = QTabWidget()
+        self.terminal_tabs = QTabWidget(self.editor_splitter)
+        self.terminal_tabs.setObjectName('TerminalTabs')
         self.terminal_tabs.setTabsClosable(True)
         self.terminal_tabs.setMovable(True)
 
         new_terminal_button = QPushButton('+')
         new_terminal_button.clicked.connect(self.attach_new_terminal)
 
-        self.editor_tabs.setCornerWidget(new_terminal_button)
-        self.terminal_tabs.setCornerWidget(new_terminal_button)
-
-        self.layout.addWidget(self.editor_tabs)
-        self.layout.addWidget(self.terminal_tabs)
-
-        self.statusBar().showMessage('Ready')
-
-        self.setGeometry(300, 300, 900, 600)
-        self.setWindowTitle('Hézuò')
+        self.central_horizontal_layout.addWidget(self.central_splitter)
+        self.setCentralWidget(self.central_widget)
 
         self.initMenuBar()
+        QtCore.QMetaObject.connectSlotsByName(self)
 
     def initMenuBar(self):
         self.menubar = self.menuBar()
 
-        file_menu = self.menubar.addMenu('File')
-        edit_menu = self.menubar.addMenu('Edit')
-        view_menu = self.menubar.addMenu('View')
-        setting_menu = self.menubar.addMenu('Setting')
+        self.file_menu = self.menubar.addMenu('File')
+        self.file_menu.setObjectName('FileMenu')
 
-        new_file_action = QAction('New File', self)
-        new_file_action.setShortcut('Ctrl + N')
-        new_file_action.triggered.connect(self.create_new_file)
+        self.new_file_action = QAction('New File', self)
+        self.new_file_action.setShortcut('Ctrl + N')
+        self.new_file_action.triggered.connect(self.create_new_file)
 
-        open_file_action = QAction('Open File', self)
-        open_file_action.setShortcut('Ctrl + O')
-        open_file_action.triggered.connect(self.open_file)
+        self.new_window_action = QAction('New Window', self)
+        self.new_window_action.setShortcut('Ctrl + Shift + N')
 
-        open_folder_action = QAction('Open Folder', self)
-        open_folder_action.triggered.connect(self.open_folder)
+        self.open_file_action = QAction('Open File', self)
+        self.open_file_action.setShortcut('Ctrl + O')
+        self.open_file_action.triggered.connect(self.open_file)
 
-        open_recents_action = QMenu('Open Recent', self)
+        self.open_folder_action = QAction('Open Folder', self)
+        self.open_folder_action.triggered.connect(self.open_folder)
 
-        edit_preferences_action = QMenu('Preferences', self)
+        self.open_recent_action = QMenu('Open Recent', self)
 
-        save_file_action = QAction('Save', self)
-        save_file_action.setShortcut('Ctrl + S')
-        save_file_action.triggered.connect(self.save_file)
+        self.save_file_action = QAction('Save', self)
+        self.save_file_action.setShortcut('Ctrl + S')
+        self.save_file_action.triggered.connect(self.save_file)
 
-        save_as_file_action = QAction('Save as...', self)
-        save_as_file_action.setShortcut('Ctrl + Shift + S')
-        save_as_file_action.triggered.connect(self.save_file_as)
+        self.save_file_as_action = QAction('Save As', self)
+        self.save_file_action.setShortcut('Ctrl + Shift + S')
+        self.save_file_as_action.triggered.connect(self.save_file_as)
 
-        save_all_files_action = QAction('Save all', self)
+        self.save_all_files_action = QAction('Save All', self)
 
-        file_menu.addAction(new_file_action)
-        file_menu.addSeparator()
-        file_menu.addAction(open_file_action)
-        file_menu.addMenu(open_recents_action)
-        file_menu.addMenu(edit_preferences_action)
-        file_menu.addSeparator()
-        file_menu.addAction(save_file_action)
-        file_menu.addAction(save_as_file_action)
-        file_menu.addAction(save_all_files_action)
+        self.view_preferences_action = QMenu('Preferences', self)
+
+        self.file_menu.addAction(self.new_file_action)
+        self.file_menu.addAction(self.new_window_action)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(self.open_file_action)
+        self.file_menu.addAction(self.open_folder_action)
+        self.file_menu.addMenu(self.open_recent_action)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(self.save_file_action)
+        self.file_menu.addAction(self.save_file_as_action)
+        self.file_menu.addAction(self.save_all_files_action)
+        self.file_menu.addSeparator()
+        self.file_menu.addMenu(self.view_preferences_action)
+
+        self.edit_menu = self.menubar.addMenu('Edit')
+        self.edit_menu.setObjectName('EditMenu')
+
+        self.selection_menu = self.menubar.addMenu('Selection')
+        self.selection_menu.setObjectName('SelectionMenu')
+
+        self.view_menu = self.menubar.addMenu('View')
+        self.view_menu.setObjectName('ViewMenu')
+
+        self.go_menu = self.menubar.addMenu('Go')
+        self.go_menu.setObjectName('GoMenu')
+
+        self.terminal_menu = self.menubar.addMenu('Terminal')
+        self.terminal_menu.setObjectName('TerminalMenu')
 
         self.setMenuBar(self.menubar)
 
