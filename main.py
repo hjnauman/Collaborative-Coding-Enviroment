@@ -10,7 +10,7 @@ from lined_text_editor import LineTextWidget
 
 # Rename tab code
 # self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("self", "Tab 1"))
-
+increment = 0
 class MainEditorWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -167,7 +167,10 @@ class MainEditorWindow(QMainWindow):
         print('remove')
 
     def create_new_file(self):
-        self.create_editor('', 'New File')
+        global increment
+        increment += 1
+        self.create_editor('', 'New File ' + str(increment))
+        return increment
 
     def open_file(self):
         options = QFileDialog.Options()
@@ -195,12 +198,12 @@ class MainEditorWindow(QMainWindow):
             with open(file_name, 'w+') as file:
                 current_tab = self.editor_tabs.currentWidget().windowTitle()
 
-                if current_tab == 'New File':
+                if current_tab[:8] == 'New File':
                     text_editor = LineTextWidget(self)
                     title = file_name.rsplit('/', 1)[-1]
                     text_editor.setWindowTitle(title)
                     self.editors[title] = [text_editor, file_name, False, True]
-
+                    
                 text = (self.editors[current_tab][0].getTextEdit().toPlainText())
 
                 file.write(text)
@@ -208,7 +211,7 @@ class MainEditorWindow(QMainWindow):
 
     def save_file(self):
         current_tab = self.editor_tabs.currentWidget().windowTitle()
-        if current_tab == 'New File':
+        if current_tab[:8] == 'New File':
             self.save_file_as()
         else:
             file = open(self.editors[current_tab][1],'w')
