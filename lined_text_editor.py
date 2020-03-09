@@ -21,7 +21,7 @@ class NumberBar(QWidget):
             self.setFixedWidth(width)
 
         QWidget.update(self, *args)
-
+"""
     def paintEvent(self, event):
         contents_y = self.edit.verticalScrollBar().value()
         page_bottom = contents_y + self.edit.viewport().height()
@@ -61,7 +61,7 @@ class NumberBar(QWidget):
         painter.end()
 
         QWidget.paintEvent(self, event)
-
+"""
 class LineTextWidget(QFrame):
     def __init__(self, *args):
         QFrame.__init__(self, *args)
@@ -88,7 +88,7 @@ class LineTextWidget(QFrame):
         if object in (self.edit, self.edit.viewport()):
             self.number_bar.update()
             return False
-        
+
         return QFrame.eventFilter(object, event)
 
     def getTextEdit(self):
