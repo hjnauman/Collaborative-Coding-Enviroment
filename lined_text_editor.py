@@ -3,16 +3,29 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.Qt import QFrame, QWidget, QTextEdit, QHBoxLayout, QPainter
+from PyQt5.Qt import QFrame, QWidget, QTextEdit, QHBoxLayout, QVBoxLayout,QPainter
 
 class NumberBar(QWidget):
-    def __init__(self, *args):
-        QWidget.__init__(self, *args)
-        self.edit = None
-        self.highest_line = 0
+    def __init__(self, parent = None):
+        super(NumberBar, self).__init__(parent)
+        self.editor = parent
+        layout = QVBoxLayout()
+        self.editor.blockCountChanged.connect(self.update_width)
+        self.editor.updateRequest.connect(self.update_on_scroll)
+        self.update_width('1')
 
-    def setTextEdit(self, edit):
-        self.edit = edit
+
+    def update_on_scroll(self, rect, scroll):
+        if self.isVisible():
+            if scroll:
+                self.scroll(0, scroll)
+            else:
+                self.update()
+
+    def update_width(self, string):
+        width = self.fontMetrics().width(str(string)) + 8
+        if self.width() != width:
+            self.setFixedWidth(width)
 
     def update(self, *args):
         width = self.fontMetrics().width(str(self.highest_line)) + 4
@@ -21,8 +34,12 @@ class NumberBar(QWidget):
             self.setFixedWidth(width)
 
         QWidget.update(self, *args)
-"""
+
     def paintEvent(self, event):
+        block = self.editor.firstVisibleBlock()
+        height = self.fontMetrics().height()
+        number = block.blockNumber()
+
         contents_y = self.edit.verticalScrollBar().value()
         page_bottom = contents_y + self.edit.viewport().height()
         font_metrics = self.fontMetrics()
@@ -61,7 +78,7 @@ class NumberBar(QWidget):
         painter.end()
 
         QWidget.paintEvent(self, event)
-"""
+
 class LineTextWidget(QFrame):
     def __init__(self, *args):
         QFrame.__init__(self, *args)
