@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import asyncio
+import platform
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -146,10 +147,25 @@ class MainEditorWindow(QMainWindow):
         self.setMenuBar(self.menubar)
 
     def attach_new_terminal(self):
+        """
+        if (sys.platform == 'linux1') or (sys.platform == 'linux2') or (sys.platform == 'darwin'):
+            terminal_process = QProcess(self)
+            terminal_window = QWidget(self)
+            terminal_process.start('xterm',['-into', str(int(terminal_window.winId()))])
+            self.terminals.append(terminal_process)
+            self.terminal_tabs.addTab(terminal_window, 'Terminal')
+        elif sys.platform == 'win32':
+            os.system("cmd")
+        else:
+            terminal_process = QProcess(self)
+            terminal_window = QWidget(self)
+            terminal_process.start('xterm',['-into', str(int(terminal_window.winId()))])
+            self.terminals.append(terminal_process)
+            self.terminal_tabs.addTab(terminal_window, 'Terminal')
+            """
         terminal_process = QProcess(self)
         terminal_window = QWidget(self)
         terminal_process.start('xterm',['-into', str(int(terminal_window.winId()))])
-
         self.terminals.append(terminal_process)
         self.terminal_tabs.addTab(terminal_window, 'Terminal')
 
