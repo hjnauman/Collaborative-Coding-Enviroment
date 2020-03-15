@@ -15,7 +15,7 @@ class NumberBar(QWidget):
         self.edit = edit
 
     def update(self, *args):
-        width = self.fontMetrics().width(str(self.highest_line)) + 4
+        width = self.fontMetrics().width(str(self.highest_line)) + 25
 
         if self.width() != width:
             self.setFixedWidth(width)
@@ -48,7 +48,7 @@ class NumberBar(QWidget):
                 font.setBold(True)
                 painter.setFont(font)
 
-            painter.drawText(self.width() - font_metrics.width(str(line_count)) - 3, round(position.y()) - contents_y + font_metrics.ascent(), str(line_count))
+            painter.drawText(self.width() - font_metrics.width(str(line_count)) - 24, round(position.y()) - contents_y + font_metrics.ascent(), str(line_count))
 
             if bold:
                 font = painter.font()
