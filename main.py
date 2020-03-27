@@ -126,8 +126,40 @@ class MainEditorWindow(QMainWindow):
         self.edit_menu = self.menubar.addMenu('Edit')
         self.edit_menu.setObjectName('EditMenu')
 
+        self.undo_action = QAction('Undo', self)
+        self.undo_action.setShortcut('Ctrl + Z')
+
+        self.redo_action = QAction('Redo', self)
+        self.redo_action.setShortcut('Ctrl + Y')
+
+        self.cut_action = QAction('Cut', self)
+        self.cut_action.setShortcut('Ctrl + X')
+       
+        self.copy_action = QAction('Copy', self)
+        self.copy_action.setShortcut('Ctrl + C')
+
+        self.paste_action = QAction('Paste', self)
+        self.paste_action.setShortcut('Ctrl + V')
+
+        self.find_action = QAction('Find', self)
+        self.find_action.setShortcut('Ctrl + F')
+
+        self.edit_menu.addAction(self.undo_action)
+        self.edit_menu.addAction(self.redo_action)
+        self.edit_menu.addSeparator()
+        self.edit_menu.addAction(self.cut_action)
+        self.edit_menu.addAction(self.copy_action)
+        self.edit_menu.addAction(self.paste_action)
+        self.edit_menu.addSeparator()
+        self.edit_menu.addAction(self.find_action)
+
         self.selection_menu = self.menubar.addMenu('Selection')
         self.selection_menu.setObjectName('SelectionMenu')
+
+        self.select_all_action = QAction('Select All', self)
+        self.select_all_action.setShortcut('Ctrl + A')
+
+        self.selection_menu.addAction(self.select_all_action)
 
         self.view_menu = self.menubar.addMenu('View')
         self.view_menu.setObjectName('ViewMenu')
