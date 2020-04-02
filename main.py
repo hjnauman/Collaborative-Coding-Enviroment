@@ -83,14 +83,14 @@ class MainEditorWindow(QMainWindow):
         self.file_menu.setObjectName('FileMenu')
 
         self.new_file_action = QAction('New File', self)
-        self.new_file_action.setShortcut('Ctrl + N')
+        self.new_file_action.setShortcut(QKeySequence("Ctrl+N"))
         self.new_file_action.triggered.connect(self.create_new_file)
 
         self.new_window_action = QAction('New Window', self)
-        self.new_window_action.setShortcut('Ctrl + Shift + N')
+        self.new_window_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
 
         self.open_file_action = QAction('Open File', self)
-        self.open_file_action.setShortcut('Ctrl + O')
+        self.open_file_action.setShortcut(QKeySequence("Ctrl+O"))
         self.open_file_action.triggered.connect(self.open_file)
 
         self.open_folder_action = QAction('Open Folder', self)
@@ -99,11 +99,11 @@ class MainEditorWindow(QMainWindow):
         self.open_recent_action = QMenu('Open Recent', self)
 
         self.save_file_action = QAction('Save', self)
-        self.save_file_action.setShortcut('Ctrl + S')
+        self.save_file_action.setShortcut(QKeySequence("Ctrl+S"))
         self.save_file_action.triggered.connect(self.save_file)
 
         self.save_file_as_action = QAction('Save As', self)
-        self.save_file_action.setShortcut('Ctrl + Shift + S')
+        self.save_file_as_action.setShortcut(QKeySequence("Ctrl+Shift+S"))
         self.save_file_as_action.triggered.connect(self.save_file_as)
 
         self.save_all_files_action = QAction('Save All', self)
@@ -127,22 +127,22 @@ class MainEditorWindow(QMainWindow):
         self.edit_menu.setObjectName('EditMenu')
 
         self.undo_action = QAction('Undo', self)
-        self.undo_action.setShortcut('Ctrl + Z')
+        self.undo_action.setShortcut(QKeySequence("Ctrl+Z"))
 
         self.redo_action = QAction('Redo', self)
-        self.redo_action.setShortcut('Ctrl + Y')
+        self.redo_action.setShortcut(QKeySequence("Ctrl+Y"))
 
         self.cut_action = QAction('Cut', self)
-        self.cut_action.setShortcut('Ctrl + X')
+        self.cut_action.setShortcut(QKeySequence("Ctrl+X"))
        
         self.copy_action = QAction('Copy', self)
-        self.copy_action.setShortcut('Ctrl + C')
+        self.copy_action.setShortcut(QKeySequence("Ctrl+C"))
 
         self.paste_action = QAction('Paste', self)
-        self.paste_action.setShortcut('Ctrl + V')
+        self.paste_action.setShortcut(QKeySequence("Ctrl+V"))
 
         self.find_action = QAction('Find', self)
-        self.find_action.setShortcut('Ctrl + F')
+        self.find_action.setShortcut(QKeySequence("Ctrl+F"))
 
         self.edit_menu.addAction(self.undo_action)
         self.edit_menu.addAction(self.redo_action)
@@ -157,12 +157,43 @@ class MainEditorWindow(QMainWindow):
         self.selection_menu.setObjectName('SelectionMenu')
 
         self.select_all_action = QAction('Select All', self)
-        self.select_all_action.setShortcut('Ctrl + A')
+        self.select_all_action.setShortcut(QKeySequence("Ctrl+A"))
+
+        self.find_action = QAction('Find', self)
+        self.find_action.setShortcut(QKeySequence("Ctrl+F"))
+        self.find_action.triggered.connect(self.find)
+
+        self.replace_action = QAction('Replace', self)
+        self.replace_action.setShortcut(QKeySequence("Ctrl+H"))
+        self.replace_action.triggered.connect(self.replace)
 
         self.selection_menu.addAction(self.select_all_action)
+        self.selection_menu.addAction(self.find_action)
+        self.selection_menu.addAction(self.replace_action)
 
         self.view_menu = self.menubar.addMenu('View')
         self.view_menu.setObjectName('ViewMenu')
+
+        self.fullscreen_action = QAction('Fullscreen', self)
+        self.fullscreen_action.setShortcut(QKeySequence("F11"))
+        self.fullscreen_action.triggered.connect(self.fullscreen)
+
+        self.zoom_action = QMenu('Zoom', self)
+        self.zoom_action.triggered.connect(self.fullscreen)
+
+        self.zoom_in_action = QAction('Zoom In',self)
+        self.zoom_in_action.setShortcut(QKeySequence("Ctrl+MouseWheelUp"))
+        self.zoom_in_action.triggered.connect(self.zoom_in)
+
+        self.zoom_out_action = QAction('Zoom Out',self)
+        self.zoom_out_action.setShortcut(QKeySequence("Ctrl+MouseWheelDown"))
+        self.zoom_out_action.triggered.connect(self.zoom_out)
+        
+
+        self.view_menu.addAction(self.fullscreen_action)
+        self.view_menu.addMenu(self.zoom_action)
+        self.zoom_action.addAction(self.zoom_in_action)
+        self.zoom_action.addAction(self.zoom_out_action)
 
         self.go_menu = self.menubar.addMenu('Go')
         self.go_menu.setObjectName('GoMenu')
@@ -171,7 +202,7 @@ class MainEditorWindow(QMainWindow):
         self.terminal_menu.setObjectName('TerminalMenu')
 
         self.new_terminal_action =  QAction('New Terminal', self)
-        self.new_terminal_action.setShortcut('Ctrl + Shift + `')
+        self.new_terminal_action.setShortcut(QKeySequence("Ctrl+Shift+`"))
         self.new_terminal_action.triggered.connect(self.attach_new_terminal)
 
         self.terminal_menu.addAction(self.new_terminal_action)
@@ -277,6 +308,21 @@ class MainEditorWindow(QMainWindow):
             widget.deleteLater()
 
         self.editor_tabs.removeTab(index)
+
+    def find(self):
+        print('test')
+
+    def replace(self):
+        print('test')
+
+    def fullscreen(self):
+        self.showMaximized()
+
+    def zoom_in(self):
+        print('test')
+
+    def zoom_out(self):
+        print('test')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
