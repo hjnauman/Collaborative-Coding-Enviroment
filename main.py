@@ -77,7 +77,7 @@ class MainEditorWindow(QMainWindow):
         self.initMenuBar()
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        self.initNumberBar()
+        self.initStatusBar()
 
     def initMenuBar(self):
         self.menubar = self.menuBar()
@@ -181,12 +181,12 @@ class MainEditorWindow(QMainWindow):
 
         self.setMenuBar(self.menubar)
 
-    def initNumberBar(self):
-        number_bar = NumberBar(self)
-        number_bar.setTextEdit(self.editor_tabs.currentWidget())
-        self.statusBar = QStatusBar()
-        self.setStatusBar(self.statusBar)
-        self.statusBar.showMessage("Ln 154, Col 48")
+    def initStatusBar(self):
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+
+        self.cursor_pos_label = QLabel("test")
+        self.status_bar.addPermanentWidget(self.cursor_pos_label)
 
     def attach_new_terminal(self):
         """
@@ -212,7 +212,7 @@ class MainEditorWindow(QMainWindow):
         self.terminal_tabs.addTab(terminal_window, 'Terminal')
 
     def create_editor(self, file_contents, file_path):
-        text_editor = LineTextWidget(self)
+        text_editor = LineTextWidget(self.cursor_pos_label, self)
         text_editor.getTextEdit().setText(file_contents)
 
         title = file_path.rsplit('/', 1)[-1]
@@ -293,9 +293,5 @@ if __name__ == '__main__':
 
     main_window = MainEditorWindow()
     main_window.show()
-
-
-    #while True:
-        #number_bar.update()
 
     sys.exit(app.exec_())
