@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, QProcess
 from lined_text_editor import LineTextWidget
+from lined_text_editor import NumberBar
 
 # Rename tab code
 # self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("self", "Tab 1"))
@@ -40,7 +41,7 @@ class MainEditorWindow(QMainWindow):
         self.file_scroll_area = QScrollArea(self.central_splitter)
         self.file_scroll_area.setWidgetResizable(True)
         self.file_scroll_area.setObjectName('FileScrollArea')
-        
+
         self.file_area_widget = QWidget()
         self.file_area_widget.setGeometry(QtCore.QRect(0, 0, 99, 779))
         self.file_area_widget.setObjectName('FileAreaWidget')
@@ -75,6 +76,8 @@ class MainEditorWindow(QMainWindow):
 
         self.initMenuBar()
         QtCore.QMetaObject.connectSlotsByName(self)
+
+        self.initStatusBar()
 
     def initMenuBar(self):
         self.menubar = self.menuBar()
@@ -209,6 +212,13 @@ class MainEditorWindow(QMainWindow):
 
         self.setMenuBar(self.menubar)
 
+    def initStatusBar(self):
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+
+        self.cursor_pos_label = QLabel("test")
+        self.status_bar.addPermanentWidget(self.cursor_pos_label)
+
     def attach_new_terminal(self):
         """
         if (sys.platform == 'linux1') or (sys.platform == 'linux2') or (sys.platform == 'darwin'):
@@ -233,7 +243,7 @@ class MainEditorWindow(QMainWindow):
         self.terminal_tabs.addTab(terminal_window, 'Terminal')
 
     def create_editor(self, file_contents, file_path):
-        text_editor = LineTextWidget(self)
+        text_editor = LineTextWidget(self.cursor_pos_label, self)
         text_editor.getTextEdit().setText(file_contents)
 
         title = file_path.rsplit('/', 1)[-1]
@@ -282,7 +292,7 @@ class MainEditorWindow(QMainWindow):
                     title = file_name.rsplit('/', 1)[-1]
                     text_editor.setWindowTitle(title)
                     self.editors[title] = [text_editor, file_name, False, True]
-                    
+
                 text = (self.editors[current_tab][0].getTextEdit().toPlainText())
 
                 file.write(text)
@@ -326,7 +336,7 @@ class MainEditorWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    
+
     main_window = MainEditorWindow()
     main_window.show()
 

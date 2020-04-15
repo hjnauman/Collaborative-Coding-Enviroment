@@ -63,7 +63,7 @@ class NumberBar(QWidget):
         QWidget.paintEvent(self, event)
 
 class LineTextWidget(QFrame):
-    def __init__(self, *args):
+    def __init__(self, cur_pos_label, *args):
         QFrame.__init__(self, *args)
 
         self.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
@@ -71,6 +71,7 @@ class LineTextWidget(QFrame):
         self.edit = QTextEdit()
         self.edit.setFrameStyle(QFrame.NoFrame)
         self.edit.setAcceptRichText(False)
+        self.edit.cursorPositionChanged.connect(self.cursorPositionChanged)
 
         self.number_bar = NumberBar()
         self.number_bar.setTextEdit(self.edit)
@@ -83,6 +84,7 @@ class LineTextWidget(QFrame):
 
         self.edit.installEventFilter(self)
         self.edit.viewport().installEventFilter(self)
+        self.cur_pos_label = cur_pos_label
 
     def eventFilter(self, object, event):
         if object in (self.edit, self.edit.viewport()):
@@ -90,6 +92,10 @@ class LineTextWidget(QFrame):
             return False
         
         return QFrame.eventFilter(object, event)
+
+    def cursorPositionChanged(self):
+        cur_cursor = self.edit.textCursor()
+        self.cur_pos_label.setText(f'Ln {self.edit.textCursor().blockNumber()}, Col {self.edit.textCursor().columnNumber()}')
 
     def getTextEdit(self):
         return self.edit
