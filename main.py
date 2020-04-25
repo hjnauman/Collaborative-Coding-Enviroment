@@ -10,8 +10,6 @@ from PyQt5.QtCore import Qt, QProcess
 from lined_text_editor import LineTextWidget
 from lined_text_editor import NumberBar
 
-# Rename tab code
-# self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("self", "Tab 1"))
 increment = 0
 class MainEditorWindow(QMainWindow):
     def __init__(self):
@@ -110,6 +108,7 @@ class MainEditorWindow(QMainWindow):
         self.save_file_as_action.triggered.connect(self.save_file_as)
 
         self.save_all_files_action = QAction('Save All', self)
+        self.save_all_files_action.triggered.connect(self.save_all_files)
 
         self.view_preferences_action = QMenu('Preferences', self)
 
@@ -292,6 +291,7 @@ class MainEditorWindow(QMainWindow):
                     title = file_name.rsplit('/', 1)[-1]
                     text_editor.setWindowTitle(title)
                     self.editors[title] = [text_editor, file_name, False, True]
+                    self.editor_tabs.setTabText(self.editor_tabs.currentIndex(), title)
 
                 text = (self.editors[current_tab][0].getTextEdit().toPlainText())
 
@@ -309,7 +309,18 @@ class MainEditorWindow(QMainWindow):
             file.close()
 
     def save_all_files(self):
-        print('test')
+        i = 0
+        while  i< self.editor_tabs.count():
+            current_tab = i
+            if self.editor_tabs.tabText(i)[:8] == 'New File':
+                self.save_file_as()
+                i +=1
+            else:
+                file = open(self.editors[current_tab][1],'w')
+                text = self.editors[current_tab][0].getTextEdit().toPlainText()
+                file.write(text)
+                file.close()
+                i +=1
 
     def remove_tab(self, index):
         widget = self.editor_tabs.widget(index)
