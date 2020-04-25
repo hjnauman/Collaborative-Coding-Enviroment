@@ -311,16 +311,33 @@ class MainEditorWindow(QMainWindow):
     def save_all_files(self):
         i = 0
         while  i< self.editor_tabs.count():
-            current_tab = i
             if self.editor_tabs.tabText(i)[:8] == 'New File':
-                self.save_file_as()
-                i +=1
+                options = QFileDialog.Options()
+                options |= QFileDialog.DontUseNativeDialog
+                file_name, _ = QFileDialog.getSaveFileName(self, 'Save File As', '', 'All Files (*);;Text Files (*.txt)', options=options)
+
+                if file_name:
+                    with open(file_name, 'w+') as file:
+                        current_tab = self.editor_tabs.widget(i).windowTitle()
+
+                        if current_tab[:8] == 'New File':
+                            text_editor = LineTextWidget(self)
+                            title = file_name.rsplit('/', 1)[-1]
+                            text_editor.setWindowTitle(title)
+                            self.editors[title] = [text_editor, file_name, False, True]
+                            self.editor_tabs.setTabText(i, title)
+
+                        text = (self.editors[current_tab][0].getTextEdit().toPlainText())
+
+                        file.write(text)
+                        file.close()
             else:
+                current_tab = self.editor_tabs.tabText(i)
                 file = open(self.editors[current_tab][1],'w')
-                text = self.editors[current_tab][0].getTextEdit().toPlainText()
+                text = self.editors[self.editor_tabs.widget(i).windowTitle()][0].getTextEdit().toPlainText()
                 file.write(text)
                 file.close()
-                i +=1
+            i += 1  
 
     def remove_tab(self, index):
         widget = self.editor_tabs.widget(index)
